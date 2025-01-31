@@ -1,0 +1,329 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 업로드 및 정보 입력</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+        }
+
+        label {
+            margin-top: 10px;
+        }
+
+        input, button {
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #45a049;
+            }
+
+        #recordList {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 600px;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        #audioList {
+            margin-top: 20px;
+        }
+
+            #audioList ul {
+                list-style: none;
+                padding: 0;
+            }
+
+            #audioList li {
+                margin: 5px 0;
+            }
+
+                #audioList li button {
+                    padding: 5px 10px;
+                    background-color: #2196F3;
+                    color: white;
+                    border: none;
+                    cursor: pointer;
+                }
+
+                    #audioList li button:hover {
+                        background-color: #1E88E5;
+                    }
+
+        .deleteBtn {
+            background-color: #F44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+            .deleteBtn:hover {
+                background-color: #D32F2F;
+            }
+
+        #audioControls {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+            #audioControls button {
+                padding: 10px 20px;
+                background-color: #007BFF;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+
+                #audioControls button:hover {
+                    background-color: #0056b3;
+                }
+
+        #player {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>파일 업로드 및 정보 입력</h1>
+        <form id="uploadForm">
+            <label for="file">오디오 파일 선택:</label>
+            <input type="file" id="file" name="file" accept="audio/*" required multiple onchange="updateFileFields()">
+
+            <div id="dynamicFields">
+                <!-- 동적으로 생성된 파일명, 가수 입력란이 여기에 표시됩니다 -->
+            </div>
+
+            <button type="submit">제출</button>
+        </form>
+
+        <div id="recordList">
+            <h2>저장된 목록</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>이름</th>
+                        <th>가수</th>
+                        <th>파일</th>
+                        <th>삭제</th>
+                    </tr>
+                </thead>
+                <tbody id="recordTable">
+                    <!-- 저장된 데이터가 여기에 표시됩니다 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="audioList">
+            <h2>노래 목록</h2>
+            <ul id="audioItems">
+                <!-- 오디오 항목이 여기에 추가됩니다 -->
+            </ul>
+            <audio id="player" controls>
+                <p>브라우저가 오디오 재생을 지원하지 않습니다.</p>
+            </audio>
+        </div>
+    </main>
+
+    <div id="audioControls">
+        <button onclick="prevTrack()">이전 곡</button>
+        <button onclick="playTrack()">재생</button>
+        <button onclick="pauseTrack()">정지</button>
+        <button onclick="nextTrack()">다음 곡</button>
+    </div>
+
+    <script>
+        let currentIndex = 0; // 현재 재생 중인 곡의 인덱스
+
+        function loadSavedData() {
+            const records = JSON.parse(localStorage.getItem('records')) || [];
+            const recordTable = document.getElementById('recordTable');
+            const audioItems = document.getElementById('audioItems');
+
+            recordTable.innerHTML = '';
+            audioItems.innerHTML = '';
+
+            records.forEach((record, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${record.name}</td>
+                        <td>${record.caller}</td>
+                        <td><a href="${record.fileURL}" target="_blank">재생</a></td>
+                        <td><button class="deleteBtn" onclick="deleteRecord(${index})">삭제</button></td>
+                    `;
+                recordTable.appendChild(row);
+
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                        <button onclick="playAudio(${index})">${index + 1}번</button> - ${record.name} (${record.caller})
+                    `;
+                audioItems.appendChild(listItem);
+            });
+
+            if (records.length > 0) {
+                const player = document.getElementById('player');
+                player.src = records[currentIndex]?.fileURL || '';
+            }
+        }
+
+        function playAudio(index) {
+            const records = JSON.parse(localStorage.getItem('records')) || [];
+            const player = document.getElementById('player');
+
+            if (index >= 0 && index < records.length) {
+                currentIndex = index;
+                player.src = records[currentIndex].fileURL;
+                player.play();
+            }
+        }
+
+        function playTrack() {
+            const player = document.getElementById('player');
+            if (player.src) {
+                player.play();
+            }
+        }
+
+        function pauseTrack() {
+            const player = document.getElementById('player');
+            player.pause();
+        }
+
+        function nextTrack() {
+            const records = JSON.parse(localStorage.getItem('records')) || [];
+            if (currentIndex + 1 < records.length) {
+                playAudio(currentIndex + 1);
+            } else {
+                alert('마지막 곡입니다.');
+            }
+        }
+
+        function prevTrack() {
+            if (currentIndex > 0) {
+                playAudio(currentIndex - 1);
+            } else {
+                alert('첫 번째 곡입니다.');
+            }
+        }
+
+        function deleteRecord(index) {
+            const records = JSON.parse(localStorage.getItem('records')) || [];
+            records.splice(index, 1);
+            localStorage.setItem('records', JSON.stringify(records));
+            loadSavedData();
+
+            if (currentIndex >= records.length) {
+                currentIndex = records.length - 1;
+            }
+            if (currentIndex >= 0) {
+                playAudio(currentIndex);
+            } else {
+                document.getElementById('player').src = '';
+            }
+        }
+
+        function updateFileFields() {
+            const fileInput = document.getElementById('file');
+            const dynamicFields = document.getElementById('dynamicFields');
+            dynamicFields.innerHTML = '';
+
+            if (fileInput.files.length > 0) {
+                Array.from(fileInput.files).forEach((file, index) => {
+                    const fieldset = document.createElement('fieldset');
+                    fieldset.innerHTML = `
+                            <legend>${file.name}</legend>
+                            <label for="name_${index}">노래 이름:</label>
+                            <input type="text" id="name_${index}" required>
+                            <label for="caller_${index}">가수:</label>
+                            <input type="text" id="caller_${index}" required>
+                        `;
+                    dynamicFields.appendChild(fieldset);
+                });
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('file');
+            const records = JSON.parse(localStorage.getItem('records')) || [];
+
+            if (fileInput.files.length > 0) {
+                Array.from(fileInput.files).forEach((file, index) => {
+                    const name = document.getElementById(`name_${index}`).value;
+                    const caller = document.getElementById(`caller_${index}`).value;
+                    const fileURL = URL.createObjectURL(file);
+
+                    if (name && caller) {
+                        records.push({ name, caller, fileURL });
+                    }
+                });
+
+                localStorage.setItem('records', JSON.stringify(records));
+                alert('업로드 성공!');
+                fileInput.value = '';
+                document.getElementById('dynamicFields').innerHTML = '';
+                loadSavedData();
+            } else {
+                alert('파일을 선택하세요!');
+            }
+        });
+
+        loadSavedData();
+    </script>
+</body>
+</html>
