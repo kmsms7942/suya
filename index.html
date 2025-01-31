@@ -157,19 +157,20 @@
         function checkPassword() {
             const password = document.getElementById('passwordInput').value;
             if (password === "2580") {
-                localStorage.setItem('authenticated', 'true');
-                showMainContent();
+                localStorage.setItem('authenticated', 'true');  // 인증 상태 저장
+                showMainContent();  // 메인 콘텐츠 보여주기
             } else {
-                alert('비밀번호가 틀렸습니다.');
+                alert('비밀번호가 틀렸습니다.');  // 비밀번호가 틀리면 경고
             }
         }
 
         function showMainContent() {
-            document.getElementById('passwordScreen').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('passwordScreen').style.display = 'none';  // 비밀번호 화면 숨기기
+            document.getElementById('mainContent').style.display = 'block';    // 메인 콘텐츠 보이기
         }
 
         function loadSavedData() {
+            // 인증 상태 확인 후, 인증된 경우 메인 콘텐츠 표시
             if (localStorage.getItem('authenticated') === 'true') {
                 showMainContent();
             }
@@ -184,16 +185,15 @@
             records.forEach((record, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML =
-                        <td>${index + 1}</td>
+                    `<td>${index + 1}</td>
                         <td>${record.name}</td>
                         <td>${record.caller}</td>
                         <td><a href="${record.fileURL}" target="_blank">재생</a></td>
-                        <td><button onclick="deleteRecord(${index})">삭제</button></td>
-                    ;
+                        <td><button onclick="deleteRecord(${index})">삭제</button></td>`;
                 recordTable.appendChild(row);
 
                 const listItem = document.createElement('li');
-                listItem.innerHTML = <button onclick="playAudio(${index})">${record.name} - ${record.caller}</button>;
+                listItem.innerHTML = `<button onclick="playAudio(${index})">${record.name} - ${record.caller}</button>`;
                 audioItems.appendChild(listItem);
             });
         }
@@ -206,46 +206,45 @@
             Array.from(fileInput.files).forEach((file, index) => {
                 const fieldset = document.createElement('fieldset');
                 fieldset.innerHTML =
-                        <legend>${file.name}</legend>
+                    `<legend>${file.name}</legend>
                         <label>노래 이름:</label>
                         <input type="text" id="name_${index}" required>
                         <label>가수:</label>
-                        <input type="text" id="caller_${index}" required>
-                    ;
-                    dynamicFields.appendChild(fieldset);
-                });
-            }
+                        <input type="text" id="caller_${index}" required>`;
+                dynamicFields.appendChild(fieldset);
+            });
+        }
 
-            document.getElementById('uploadForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                const fileInput = document.getElementById('file');
-                const records = JSON.parse(localStorage.getItem('records')) || [];
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('file');
+            const records = JSON.parse(localStorage.getItem('records')) || [];
 
-                Array.from(fileInput.files).forEach((file, index) => {
-                    const name = document.getElementById(name_${index}).value;
-                    const caller = document.getElementById(caller_${index}).value;
-                    const fileURL = URL.createObjectURL(file);
+            Array.from(fileInput.files).forEach((file, index) => {
+                const name = document.getElementById(`name_${index}`).value;
+                const caller = document.getElementById(`caller_${index}`).value;
+                const fileURL = URL.createObjectURL(file);
 
-                    if (name && caller) {
-                        records.push({ name, caller, fileURL });
-                    }
-                });
-
-                localStorage.setItem('records', JSON.stringify(records));
-                alert('업로드 성공!');
-                fileInput.value = '';
-                document.getElementById('dynamicFields').innerHTML = '';
-                loadSavedData();
+                if (name && caller) {
+                    records.push({ name, caller, fileURL });
+                }
             });
 
-            function deleteRecord(index) {
-                const records = JSON.parse(localStorage.getItem('records')) || [];
-                records.splice(index, 1);
-                localStorage.setItem('records', JSON.stringify(records));
-                loadSavedData();
-            }
-
+            localStorage.setItem('records', JSON.stringify(records));
+            alert('업로드 성공!');
+            fileInput.value = '';
+            document.getElementById('dynamicFields').innerHTML = '';
             loadSavedData();
+        });
+
+        function deleteRecord(index) {
+            const records = JSON.parse(localStorage.getItem('records')) || [];
+            records.splice(index, 1);
+            localStorage.setItem('records', JSON.stringify(records));
+            loadSavedData();
+        }
+
+        loadSavedData();  // 페이지가 로드될 때 저장된 데이터를 불러옵니다.
     </script>
 </body>
 </html>
