@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>파일 업로드 및 정보 입력</title>
+    <title>SUYA 수야닷! :)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -104,17 +104,17 @@
 <body>
     <!-- 비밀번호 입력 화면 -->
     <div id="passwordScreen">
-        <h2>비밀번호를 입력하세요</h2>
-        <input type="password" id="passwordInput" placeholder="비밀번호 입력">
+        <h2>PIN을 입력하세요</h2>
+        <input type="password" id="passwordInput" placeholder="PIN 입력">
         <button onclick="checkPassword()">확인</button>
     </div>
 
     <!-- 메인 콘텐츠 -->
     <div id="mainContent">
         <main>
-            <h1>파일 업로드 및 정보 입력</h1>
+            <h1>SUYA 수야닷! :)</h1>
             <form id="uploadForm">
-                <label for="file">오디오 파일 선택:</label>
+                <label for="file">오디오 파일 선택(오디오 파일만 선택!!):</label>
                 <input type="file" id="file" name="file" accept="audio/*" required multiple onchange="updateFileFields()">
 
                 <div id="dynamicFields"></div>
@@ -129,7 +129,6 @@
                         <th>번호</th>
                         <th>이름</th>
                         <th>가수</th>
-                        <th>파일</th>
                         <th>삭제</th>
                     </tr>
                 </thead>
@@ -149,6 +148,9 @@
             <button onclick="pauseTrack()">정지</button>
             <button onclick="nextTrack()">다음 곡</button>
         </div>
+
+        <!-- 잠금 버튼 -->
+        <button id="lockButton" onclick="lockContent()">잠그기</button>
     </div>
 
     <script>
@@ -157,22 +159,24 @@
         function checkPassword() {
             const password = document.getElementById('passwordInput').value;
             if (password === "2580") {
-                localStorage.setItem('authenticated', 'true');  // 인증 상태 저장
-                showMainContent();  // 메인 콘텐츠 보여주기
+                localStorage.setItem('authenticated', 'true');
+                showMainContent();
             } else {
-                alert('비밀번호가 틀렸습니다.');  // 비밀번호가 틀리면 경고
+                alert('비밀번호가 틀렸습니다.');
             }
         }
 
         function showMainContent() {
-            document.getElementById('passwordScreen').style.display = 'none';  // 비밀번호 화면 숨기기
-            document.getElementById('mainContent').style.display = 'block';    // 메인 콘텐츠 보이기
+            document.getElementById('passwordScreen').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
         }
 
         function loadSavedData() {
-            // 인증 상태 확인 후, 인증된 경우 메인 콘텐츠 표시
             if (localStorage.getItem('authenticated') === 'true') {
                 showMainContent();
+            } else {
+                document.getElementById('passwordScreen').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'none';
             }
 
             const records = JSON.parse(localStorage.getItem('records')) || [];
@@ -244,7 +248,26 @@
             loadSavedData();
         }
 
-        loadSavedData();  // 페이지가 로드될 때 저장된 데이터를 불러옵니다.
+        function playAudio(index) {
+            const records = JSON.parse(localStorage.getItem('records')) || [];
+            const player = document.getElementById('player');
+            const audioItem = records[index];
+
+            if (audioItem && player) {
+                player.src = audioItem.fileURL;  // 오디오 파일의 URL 설정
+                player.play();  // 오디오 재생 시작
+            }
+        }
+
+        function lockContent() {
+            // 로컬스토리지에서 인증 상태 제거
+            localStorage.removeItem('authenticated');
+            // 비밀번호 입력 화면으로 돌아가기
+            document.getElementById('passwordScreen').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+        }
+
+        loadSavedData(); // 페이지가 로드될 때 저장된 데이터를 불러옵니다.
     </script>
 </body>
 </html>
