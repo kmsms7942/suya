@@ -1,273 +1,59 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUYA 수야닷! :)</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #passwordScreen {
-            text-align: center;
-        }
-
-        #mainContent {
-            display: none;
-            width: 100%;
-        }
-
-        main {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            max-width: 400px;
-        }
-
-        label {
-            margin-top: 10px;
-        }
-
-        input, button {
-            padding: 8px;
-            margin-top: 5px;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-            button:hover {
-                background-color: #45a049;
-            }
-
-        table {
-            width: 100%;
-            max-width: 600px;
-            border-collapse: collapse;
-            margin: 0 auto;
-        }
-
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
-
-        #audioControls {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #f1f1f1;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-            #audioControls button {
-                padding: 10px 20px;
-                background-color: #007BFF;
-                color: white;
-                border: none;
-                cursor: pointer;
-            }
-
-                #audioControls button:hover {
-                    background-color: #0056b3;
-                }
-    </style>
+    <title>🎵 음악 파일 관리자</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- 비밀번호 입력 화면 -->
-    <div id="passwordScreen">
-        <h2>PIN을 입력하세요</h2>
-        <input type="password" id="passwordInput" placeholder="PIN 입력">
-        <button onclick="checkPassword()">확인</button>
+    <!-- 🔒 비밀번호 입력 화면 -->
+    <div id="login-screen">
+        <h2>🔐 비밀번호 입력</h2>
+        <input type="password" id="password" placeholder="🔑 비밀번호 입력">
+        <button onclick="checkPassword()">✅ 확인</button>
     </div>
 
-    <!-- 메인 콘텐츠 -->
-    <div id="mainContent">
-        <main>
-            <h1>SUYA 수야닷! :)</h1>
-            <form id="uploadForm">
-                <label for="file">오디오 파일 선택(오디오 파일만 선택!!):</label>
-                <input type="file" id="file" name="file" accept="audio/*" required multiple onchange="updateFileFields()">
-
-                <div id="dynamicFields"></div>
-
-                <button type="submit">제출</button>
-            </form>
-
-            <h2>저장된 목록</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>번호</th>
-                        <th>이름</th>
-                        <th>가수</th>
-                        <th>삭제</th>
-                    </tr>
-                </thead>
-                <tbody id="recordTable"></tbody>
-            </table>
-
-            <h2>노래 목록</h2>
-            <ul id="audioItems"></ul>
-            <audio id="player" controls>
-                <p>브라우저가 오디오 재생을 지원하지 않습니다.</p>
-            </audio>
-        </main>
-
-        <div id="audioControls">
-            <button onclick="prevTrack()">이전 곡</button>
-            <button onclick="playTrack()">재생</button>
-            <button onclick="pauseTrack()">정지</button>
-            <button onclick="nextTrack()">다음 곡</button>
+    <!-- 🎵 메인 화면 -->
+    <div id="main-screen" style="display: none;">
+        <div class="top-bar">
+            <button onclick="window.location.reload()">🔄 새로고침</button>
+            <span id="current-time"></span>
         </div>
 
-        <!-- 잠금 버튼 -->
-        <button id="lockButton" onclick="lockContent()">잠그기</button>
+        <h2>🎶 음악 파일 관리</h2>
+        <input type="file" id="fileInput" accept=".mp3">
+        <input type="text" id="songName" placeholder="🎼 노래 제목" readonly>
+        <input type="text" id="artistName" placeholder="🎤 가수 이름" readonly>
+        <button onclick="uploadFile()">📤 업로드</button>
+        <button onclick="lockScreen()">🔒 잠그기</button>
+        <button onclick="unlockEdit()">🔓 잠금 해제</button>
+
+        <h3>📊 음악 차트</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>제목</th>
+                    <th>가수</th>
+                    <th>재생</th>
+                    <th>다운로드</th>
+                    <th>삭제</th>
+                </tr>
+            </thead>
+            <tbody id="musicList"></tbody>
+        </table>
+
+        <div class="player">
+            <button onclick="prevSong()">⏮ 이전곡</button>
+            <button id="playPauseBtn" onclick="togglePlayPause()">▶️ 재생</button>
+            <button onclick="stopSong()">⏹ 정지</button>
+            <button onclick="nextSong()">⏭ 다음곡</button>
+        </div>
+
+        <audio id="audioPlayer" onended="autoNextSong()"></audio>
     </div>
 
-    <script>
-        let currentIndex = 0;
-
-        function checkPassword() {
-            const password = document.getElementById('passwordInput').value;
-            if (password === "2580") {
-                localStorage.setItem('authenticated', 'true');
-                showMainContent();
-            } else {
-                alert('비밀번호가 틀렸습니다.');
-            }
-        }
-
-        function showMainContent() {
-            document.getElementById('passwordScreen').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-        }
-
-        function loadSavedData() {
-            if (localStorage.getItem('authenticated') === 'true') {
-                showMainContent();
-            } else {
-                document.getElementById('passwordScreen').style.display = 'block';
-                document.getElementById('mainContent').style.display = 'none';
-            }
-
-            const records = JSON.parse(localStorage.getItem('records')) || [];
-            const recordTable = document.getElementById('recordTable');
-            const audioItems = document.getElementById('audioItems');
-
-            recordTable.innerHTML = '';
-            audioItems.innerHTML = '';
-
-            records.forEach((record, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML =
-                    `<td>${index + 1}</td>
-                        <td>${record.name}</td>
-                        <td>${record.caller}</td>
-                        <td><a href="${record.fileURL}" target="_blank">재생</a></td>
-                        <td><button onclick="deleteRecord(${index})">삭제</button></td>`;
-                recordTable.appendChild(row);
-
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `<button onclick="playAudio(${index})">${record.name} - ${record.caller}</button>`;
-                audioItems.appendChild(listItem);
-            });
-        }
-
-        function updateFileFields() {
-            const fileInput = document.getElementById('file');
-            const dynamicFields = document.getElementById('dynamicFields');
-            dynamicFields.innerHTML = '';
-
-            Array.from(fileInput.files).forEach((file, index) => {
-                const fieldset = document.createElement('fieldset');
-                fieldset.innerHTML =
-                    `<legend>${file.name}</legend>
-                        <label>노래 이름:</label>
-                        <input type="text" id="name_${index}" required>
-                        <label>가수:</label>
-                        <input type="text" id="caller_${index}" required>`;
-                dynamicFields.appendChild(fieldset);
-            });
-        }
-
-        document.getElementById('uploadForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const fileInput = document.getElementById('file');
-            const records = JSON.parse(localStorage.getItem('records')) || [];
-
-            Array.from(fileInput.files).forEach((file, index) => {
-                const name = document.getElementById(`name_${index}`).value;
-                const caller = document.getElementById(`caller_${index}`).value;
-                const fileURL = URL.createObjectURL(file);
-
-                if (name && caller) {
-                    records.push({ name, caller, fileURL });
-                }
-            });
-
-            localStorage.setItem('records', JSON.stringify(records));
-            alert('업로드 성공!');
-            fileInput.value = '';
-            document.getElementById('dynamicFields').innerHTML = '';
-            loadSavedData();
-        });
-
-        function deleteRecord(index) {
-            const records = JSON.parse(localStorage.getItem('records')) || [];
-            records.splice(index, 1);
-            localStorage.setItem('records', JSON.stringify(records));
-            loadSavedData();
-        }
-
-        function playAudio(index) {
-            const records = JSON.parse(localStorage.getItem('records')) || [];
-            const player = document.getElementById('player');
-            const audioItem = records[index];
-
-            if (audioItem && player) {
-                player.src = audioItem.fileURL;  // 오디오 파일의 URL 설정
-                player.play();  // 오디오 재생 시작
-            }
-        }
-
-        function lockContent() {
-            // 로컬스토리지에서 인증 상태 제거
-            localStorage.removeItem('authenticated');
-            // 비밀번호 입력 화면으로 돌아가기
-            document.getElementById('passwordScreen').style.display = 'block';
-            document.getElementById('mainContent').style.display = 'none';
-        }
-
-        loadSavedData(); // 페이지가 로드될 때 저장된 데이터를 불러옵니다.
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
