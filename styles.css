@@ -1,41 +1,38 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    margin: 20px;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
 }
 
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    background: #f1f1f1;
+.header {
+    background-color: #222;
+    color: white;
+    padding: 15px;
+    font-size: 20px;
 }
 
-input, button {
-    margin: 5px;
-    padding: 10px;
-}
-
-table {
-    width: 100%;
-    margin-top: 10px;
-    border-collapse: collapse;
-}
-
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-}
-
-.player {
+.content {
     margin-top: 20px;
 }
 
-/* 🔐 수정 잠금 스타일 */
-.locked {
-    background-color: #ddd;
-    color: gray;
-    border: none;
-    cursor: not-allowed;
+.nav-button {
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 14px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+.nav-button:hover {
+    background-color: black;
+    color: white;
+}
+
+.hidden {
+    display: none;
 }
