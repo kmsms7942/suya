@@ -3,22 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>유튜브 기록 추적</title>
+    <title>유튜브 타이머 앱</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="header">유튜브 사용 기록</div>
-    
-    <div class="content">
-        <button onclick="viewHistory()" class="nav-button">기록</button>
-        <button onclick="goHome()" class="nav-button">홈</button>
-        <button onclick="viewMyPage()" class="nav-button">마이페이지</button>
+
+<div class="container">
+    <h1>유튜브 타이머</h1>
+
+    <div id="timer-display">
+        <p id="time">00:00:00</p>
     </div>
 
-    <div id="history" class="hidden">
-        <h2>유튜브 사용 기록</h2>
-        <ul id="history-list"></ul>
+    <div id="player-container">
+        <iframe id="youtube-player" width="560" height="315" 
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+                frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+        </iframe>
     </div>
+
+    <div class="links">
+        <p><a href="https://www.youtube.com" target="_blank">웹에서 유튜브 바로가기</a></p>
+        
+        <!-- 안드로이드 유튜브 앱 바로가기 -->
+        <p><button id="openYouTubeApp">유튜브 앱 바로가기</button></p>
+    </div>
+
+</div>
+
+<!-- 하단 메뉴 -->
+<div class="bottom-menu">
+    <button id="homeBtn">홈</button>
+    <button id="historyBtn">기록</button>
+    <button id="profileBtn">마이 페이지</button>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
